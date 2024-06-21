@@ -1,6 +1,8 @@
-\section{模型建立与求解}
+\section{模型求解}
 
-\subsection{基本理论}
+\subsection{理论求解}
+
+\subsubsection{基本理论}
     首先从理论上，基于排队论的基本公式与概率论相关知识，在理论上对两种开门模型
     进行理论计算，得到平均队长与平均等待时间作为评价通行效率的指标。
 
@@ -12,7 +14,7 @@
     $\lambda$表示单位时间内平均到达的顾客数，
     对于非高峰期与高峰期的顾客源，分别使用不同的$\lambda_l,\lambda_h$来描述。
 
-    按照泊松过程的概率公式，随机生成顾客队列，
+    接下来，基于python语言，按照泊松过程的概率公式，随机生成顾客队列，
     并让队列以$v_f=1 m/s$的速度前进。
 
     对于到达校门的人，开始进行服务。服务时间由固定服务时间与随机服务时间相加得到，
@@ -23,8 +25,7 @@
             F(t) &=1-e^{-\mu t},t>0
         \end{aligned}
     \end{equation}
-
-    求的随机服务时间$t_r$的数学期望$E(t_r)=\frac{1}{\mu}$即为平均随机服务时间，
+    求解服务时间$t_r$的数学期望$E(t_r)=\frac{1}{\mu}$即为平均服务时间，
     因此$\mu$的意义就是单位时间内的平均服务人数，也就是校门的平均通过速率。
     在加上固定服务时间$2t_c$，得到总服务时间的数学期望$E(t_{all})=2t_c+\frac{1}{\mu}$,
     方差$ Var(t_{all})=Var(t_r)=\frac{1}{\mu^2}$。
@@ -62,8 +63,7 @@
         \end{aligned}
     \end{equation}
 
-\subsection{单通道确定性模型}
-\subsubsection{理论分析}
+\subsubsection{模型1}
 首先考虑非高峰期的情况下，使用一个参数为$\lambda_{l}$的泊松过程来表示顾客源，
 使用一个常数(平均服务时间)来代替负指数分布的随机服务时长，即$M/D/1/\infty/\infty/FCFS$模型。
 
@@ -99,7 +99,7 @@
 \end{itemize}
 
 
-综合得到以下状态转移概率公式：
+综合得到一下状态转移概率公式：
 \begin{equation}
     P_n(t+\Delta t)=P_n(t)(1-\lambda \Delta t-\mu \Delta t)+P_{n+1}(t)(\mu \Delta t) +P_{n-1}(t)(\lambda \Delta t)+o(\Delta t)
 \end{equation}
@@ -120,98 +120,9 @@
 \end{equation}
 
 这个差分方程表示的各个不同状态之间的转移关系，可以用状态转移图来表示：
-\begin{figure}[ht]    
-    \centering
-    \includegraphics[width=.7\textwidth]{images/transform1.PNG}
-    \caption{单通道状态转移图}
-    \label{fig:transform1}
-\end{figure}
 
-以上的差分方程是很好求解的，由于顾客源于排队的空间都设置为无穷大，所以可以解得：
-\begin{equation}
-    \begin{aligned}
-        P_0 &=1-\rho \\
-        P_n &=(1-\rho)\rho^n,n\geq1
-    \end{aligned}
-\end{equation}
-其中的$\rho=\frac{\lambda}{\mu}$,它的物理意义为服务强度。
 
-从而可以得到$L_s$的数学期望$L_s=\frac{\rho}{1-\rho}$,这与
-基本理论中的Pollaczek-Khintchine公式结果是一致的。
-
-\subsubsection{模型建立}
-\par 将校门前的道路网格化，假设行人占据一个网格、自行车占据两个网格。
-根据假设，自行车在通过校门的时候会下车推行，
-从而行人和自行车在门前的前进速度可以认为相同，设为$1m/s$。
-对排队人群进行离散模拟，在每个模拟时间段内，如果行人或自行车前方空格
-没有被占用，则前进一格。根据这样的模拟规则，将一个网格的长度设为$1m$。
-\par 考虑单通行道的情况，模型可视化展示在图\ref{fig:1-lane-model}中。
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/cellular_automata_1_lane.png}
-    \caption{单通行道模型可视化，其中灰色块表示网格被占用，红色块表示
-    该通行者会刷卡失败（或没有校园卡），图中最右部分为校门}
-    \label{fig:1-lane-model}
-\end{figure}
-\newline 其中：
-\begin{itemize}
-    \item $L_p, L_b$分别表示行人和自行车占用的网格长度
-    \item $v_f$表示行人和自行车的前进速度
-    \item $t_o, t_c$分别表示校门的开关时间，考虑实际情况，认为$t_c=t_o$
-    \item $t_g,t_p$（图中未标注）分别为刷卡时间和通过时间，在确定性模型中
-    两者视为定值
-\end{itemize}
-人和自行车均在道路最左边生成，道路有最大长度，当道路最左侧已经被占用时，
-不再生成人。认为人的生成过程是一个泊松过程，对于高人流量和低人流量的时间段
-泊松过程的参数取值不同。
-\par 刷卡进校过程的拆分及两种开门方式的不同展示在图\ref{fig:process-entering-gate}中。
-\begin{figure}[ht]    
-    \centering
-    \includegraphics[width=.7\textwidth]{images/enter_gate_process.png}
-    \caption{刷卡进校过程及两种校门开关方式的异同}
-    \label{fig:process-entering-gate}
-\end{figure}
-在刷卡进校时，对于两种方法做相应的时间消耗分析：
-\begin{itemize}
-    \item 门保持开放：
-    \begin{itemize}
-        \item 如果刷卡成功，直接通过校门，需要的时间即为通过校门的时间加上
-        刷卡识别的时间$t_p+t_g$。如果上一个人刷卡失败，该时间变为$t_g+t_o+t_p$。
-        \item 如果刷卡失败，需要等待门关闭。根据实际生活经验，刷卡失败
-        的个体在刷卡过程中一般花费时间也较长(例如询问在哪里刷身份证)，同时
-        刷卡失败之后，一般要离开队伍，然后登记入校。
-        将这两个过程中时间的消耗合计为
-        $t_{penal}$，从而刷卡失败消耗的时间为刷卡时间、等待门关闭的时间和
-        离开队伍的时间加和$t_g+t_c+t_{penal}$。
-    \end{itemize}
-    \item 门正常开关：
-    \begin{itemize}
-        \item 如果刷卡成功，等待门开放后通过校门，下一个在队伍中的人等待门
-        关闭后继续刷卡通过。从而一个人需要的时间为$t_g+t_o+t_p+t_c$。
-        \item 如果刷卡失败，需要离开队伍。门正常开关时，不用等待门关闭，
-        从而所需时间为$t_g+t_{penal}$。
-    \end{itemize}
-\end{itemize}
-
-\subsubsection{数值模拟}
-模拟的时间步长$t^*$取为$0.5s$，根据实际生活经验，约定开门的时间$t_o=t^*$、
-行人的刷卡时间$t_g=t^*$、通过时间$t_p=t^*$、门关上的时间$t_c=t_o=t^*$。
-如果刷卡失败，耽误的时间$t_{penal}=2t^*$。根据模型分析：
-\begin{itemize}
-    \item 门保持开放：
-    \begin{itemize}
-        \item 刷卡成功：耗时$t_p+t_g=2t^*$。
-        \item 刷卡失败：耗时$t_g+t_c+t_{penal}=4t^*$。
-    \end{itemize}
-    \item 门正常开关：
-    \begin{itemize}
-        \item 刷卡成功：耗时$t_g+t_o+t_p+t_c=4t^*$。
-        \item 刷卡失败：耗时$t_g+t_{penal}=3t^*$
-    \end{itemize}
-\end{itemize}
-
-\subsection{单通道随机性模型}
-\subsubsection{理论分析}
+\subsubsection{模型2}
 考虑非高峰期的情况下，使用一个参数为$\lambda_{l}$的泊松过程来表示顾客源，
 使用负指数分布的随机服务时长，即$M/G/1/\infty/\infty/FCFS$模型。
 其中使用的是G而不是M是因为总的服务时长$t_{all}=2t_{c}+t_{r}$，是一个
@@ -219,33 +130,12 @@
 
 对本模型的求解，主要按照按模型1的求解方法，先建立对应稳态之间的差分方程：
 
+
 以下是不同时间点的状态转移关系：
-\begin{figure}[ht]    
-    \centering
-    \includegraphics[width=.7\textwidth]{images/transform2.PNG}
-    \caption{单通道状态转移图}
-    \label{fig:transform2}
-\end{figure}
-\subsubsection{模型建立}
-在确定性模型中，刷卡时间和通行时间（之后统称为服务时间）认为是常数，
-在实际情况中，服务时间往往会因为客户对象的不同而发生变化。
-选择利用负指数分布刻画这种服务时间的不确定性，从而更好地刻画队伍的运动情况。
 
-
-\subsection{多通道模型}
-\subsubsection{理论分析}
+\subsubsection{模型3}
 考虑非高峰期高峰期的情况下，使用一个参数为$\lambda_{l}，\lambda_{h}$的泊松过程来表示顾客源，
 使用负指数分布的随机服务时长，考虑多通道且允许相互转移的过程，
 即$M/G/3/C_{queue}/C_{source}/FCFS$模型。
 
 以下是不同时间点的状态转移关系：
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.7\textwidth]{images/transform3.PNG}
-    \caption{多通道状态转移图}
-    \label{fig:transform3}
-\end{figure}
-\subsubsection{模型建立}
-\par 实际情况中，往往有多条入校通道。相较于单通道，多通道的引入，使得
-行人和自行车在条件允许时，可以选择更换通道，从而更快地通过校门。
-在实际情况中，如果当前通道有人刷卡失败

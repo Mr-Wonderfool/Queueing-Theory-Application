@@ -13,3 +13,5 @@ class Params:
         self.ps = .5 # prob for switching lane
         self.isPerson = 1.
         self.isGenerate = .5 # TODO: change to poisson process
+        self.unlinedPersonNum = 0
+        self.crowdType = 1

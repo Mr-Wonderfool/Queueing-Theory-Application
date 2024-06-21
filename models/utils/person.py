@@ -34,6 +34,21 @@ class Person:
                         doorState = doors.DoorState.close
             else:
                 self.ChangeLine(TotalLine)
+                if self.idPath == 0:
+                    ifsucceccss = np.random.random()
+                    if ifsucceccss <= self.params.successRate: # successfully opened the door
+                        self.atdoor = (
+                            self.params.tp + self.params.tg + 
+                            doorType.value * self.params.tc + doorState.value * self.params.to
+                        )
+                        if doorType == doors.DoorType.keepOpen:
+                            doorState = doors.DoorState.open
+                    else:
+                        self.atdoor = (
+                            self.params.tg + self.params.tpenal + 
+                            (1 - doorType.value) * (1 - doorState.value) * self.params.tc
+                        )
+                        doorState = doors.DoorState.close
         else:
             self.atdoor -= self.params.timestep
             if self.atdoor == 0:#离开车道流程
@@ -41,12 +56,12 @@ class Person:
                 self.Line.utipass()
     def ChangeLine(self,TotalLine:list):
         """
-            行人的换道函数，当且仅当：
-            2.其所在位置前一格处有实体存在使其无法执行move()；
-            3.其左右的Line上，至少有一条Line满足:这条Line上与行人平齐的一格及其前面一格均不存在实体；
-            时，以self.params.ps为概率执行一次换道，移至新道路上与原位置平齐位置的前面一格。
-            oxo ChangeLine() pxo    oxp
-            opo -----------> ooo or ooo
+            - 行人的换道函数，当且仅当：
+            - 2.其所在位置前一格处有实体存在使其无法执行move()；
+            - 3.其左右的Line上，至少有一条Line满足:这条Line上与行人平齐的一格及其前面一格均不存在实体；
+            - 时，以self.params.ps为概率执行一次换道，移至新道路上与原位置平齐位置的前面一格。
+            - oxo ChangeLine( )    pxo or oxp
+            - opo ------------->    ooo or ooo
         """
         if TotalLine==None:
             return
@@ -72,6 +87,7 @@ class Person:
             self.idPath-=1
             self.Line = DesLine
             self.Changein = True
+            
 
             
             

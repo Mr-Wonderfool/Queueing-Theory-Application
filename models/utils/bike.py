@@ -11,7 +11,7 @@ class Bicycle:
         self.atdoor = 0#与上同：>1时车头在门前，=1时车尾在门前（车头已出门）
         self.type = "Bicycle"
         self.Line.push(self)
-    def move(self, doorType, doorState):
+    def move(self, doorType, doorState,TotalLine):
         if self.headidPath>=1:#与上同
             if self.Line.Path[self.headidPath-1]==None:
                 self.Line.Path[self.headidPath-1] = self

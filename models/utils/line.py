@@ -4,13 +4,14 @@ import numpy as np
 import time
 class Line:
     #车道类
-    def __init__(self, doorType):
+    def __init__(self, doorType,idLine = 0):
         self.params = params.Params()
         self.Path = [None]*self.params.laneLength#路段（Path）各节处的状况，为空时对应元素None,否则存储一个Person类或Bicycle类
         self.PassingCounter = 0#通过实体计数器
         self.Allutility = []#当前车道上的所有实体
         self.doorType = doorType
-    def update(self):
+        self.idLine = idLine#车道在总车道列表中的id，id相邻者视为道路相邻。
+    def update(self,TotalLine):
         #对当前车道上的所有实体进行一次移动，先进队者先动
         doorState = doors.DoorState.open
         if self.doorType == doors.DoorType.normal:
@@ -18,7 +19,7 @@ class Line:
         elif self.doorType == doors.DoorType.keepOpen:
             doorState = doors.DoorState.open
         for i in self.Allutility:
-            i.move(self.doorType, doorState)
+            i.move(self.doorType, doorState,TotalLine)
     def generate(self):
         #满足条件时在最后随机生成人或单车
         if self.Path[-1]==None:#队尾为空
@@ -48,20 +49,34 @@ class Line:
             if None == self.Path[i]:
                 str = str+"🈳"
             elif "Person" == self.Path[i].type:
-                str = str+"😡"
+                if self.Path[i].Changein == False:
+                    str = str+"😡"
+                else:
+                    str = str+"😀"
             elif "Bicycle" == self.Path[i].type:
                 str = str+"🚲"+" "
                 i += 1
             i += 1
-        print(str,end=" ")
-        time.sleep(self.params.timestep)#连续输出时每次间隔一个时间步
+        print(str,end = " ")
+        time.sleep(0.1*self.params.timestep)#连续输出时每次间隔一个时间步
         sys.stdout.flush()
-    def forward(self, print=False):
+    def forward(self,TotalLine = None,print=False,):
         #Line完整的执行一次时间步模拟的封装函数
-        self.update()
+        self.update(TotalLine)
         self.generate()
         if print:
             self.print()
     def count_occupied(self):
         """Count the block occupied in a certain time"""
         return sum(x is not None for x in self.Path)
+    def updateAllutility(self):
+        """
+            在有人换道进入时，根据self.Path记录的信息更新self.Allutility
+        """
+        self.Allutility = []
+        PreventRepeat = []
+        for x in self.Path:
+            if x != None:
+                if x not in PreventRepeat:
+                    PreventRepeat.append(x)
+                    self.Allutility.append(x)

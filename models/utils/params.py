@@ -9,7 +9,7 @@ class Params:
 
         self.laneNum = 1
         self.successRate = .9
-        self.laneLength = 40
+        self.laneLength = 30
         self.ps = .5 # prob for switching lane
         self.isPerson = 1.
-        self.isGenerate = .2 # TODO: change to poisson process
+        self.isGenerate = .5 # TODO: change to poisson process

@@ -8,8 +8,8 @@ class Params:
         self.tp = self.timestep # TODO: change to poisson process for stochastic model
 
         self.laneNum = 1
-        self.successRate = .2
-        self.laneLength = 20
+        self.successRate = .9
+        self.laneLength = 40
         self.ps = .5 # prob for switching lane
         self.isPerson = 1.
         self.isGenerate = .2 # TODO: change to poisson process

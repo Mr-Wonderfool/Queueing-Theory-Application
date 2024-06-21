@@ -62,3 +62,6 @@ class Line:
         self.generate()
         if print:
             self.print()
+    def count_occupied(self):
+        """Count the block occupied in a certain time"""
+        return sum(x is not None for x in self.Path)

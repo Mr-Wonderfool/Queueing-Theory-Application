@@ -1,3 +1,4 @@
+import numpy as np
 """Parameters used in simulation process"""
 class Params:
     def __init__(self):
@@ -5,7 +6,7 @@ class Params:
         self.tpenal = 2 * self.timestep
         self.to, self.tc = self.timestep, self.timestep
         self.tg = self.timestep
-        self.tp = self.timestep # TODO: change to poisson process for stochastic model
+        self.tp = 0. # combine swap time and pass time into negative exponential
 
         self.laneNum = 1
         self.successRate = .9
@@ -13,3 +14,6 @@ class Params:
         self.ps = .5 # prob for switching lane
         self.isPerson = 1.
         self.isGenerate = .2 # TODO: change to poisson process
+    def generate_tg(self):
+        mu = 1. / (2*self.timestep)
+        self.tg = np.random.exponential(1. / mu)

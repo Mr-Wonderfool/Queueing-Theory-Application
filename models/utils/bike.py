@@ -34,7 +34,7 @@ class Bicycle:
                         )
                         doorState = doors.DoorState.close
         else:
-            self.atdoor-=1        
+            self.atdoor -= self.params.timestep        
             if self.atdoor == 1:#=1时前进一格，车尾留在门前
                 self.Line.Path[self.tailidPath] = None
                 self.headidPath = -1

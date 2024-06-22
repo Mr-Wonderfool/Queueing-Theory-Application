@@ -19,9 +19,11 @@ class Person:
                 self.idPath-=1
                 if self.idPath == 0:
                     ifsucceccss = np.random.random()
+                    self.params.generate_tg()
                     if ifsucceccss <= self.params.successRate: # successfully opened the door
+                        # generate service time according to negative exp
                         self.atdoor = (
-                            self.params.tp + self.params.tg + 
+                            self.params.tg + 
                             doorType.value * self.params.tc + doorState.value * self.params.to
                         )
                         if doorType == doors.DoorType.keepOpen:
@@ -72,10 +74,3 @@ class Person:
             self.idPath-=1
             self.Line = DesLine
             self.Changein = True
-
-            
-            
-        
-        
-        
-    

@@ -10,10 +10,12 @@ class Params:
 
         self.laneNum = 1
         self.successRate = .9
-        self.laneLength = 30
+        self.laneLength = 40
         self.ps = .5 # prob for switching lane
         self.isPerson = 1.
         self.isGenerate = .2 # TODO: change to poisson process
     def generate_tg(self):
         mu = 1. / (2*self.timestep)
-        self.tg = np.random.exponential(1. / mu)
+        tmp = np.round(np.random.exponential(1. / mu) / self.timestep)
+        tmp = max(min(tmp, 6), 1)
+        self.tg = tmp * self.timestep

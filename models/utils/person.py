@@ -36,6 +36,21 @@ class Person:
                         doorState = doors.DoorState.close
             else:
                 self.ChangeLine(TotalLine)
+                if self.idPath == 0:
+                    ifsucceccss = np.random.random()
+                    if ifsucceccss <= self.params.successRate: # successfully opened the door
+                        self.atdoor = (
+                            self.params.tp + self.params.tg + 
+                            doorType.value * self.params.tc + doorState.value * self.params.to
+                        )
+                        if doorType == doors.DoorType.keepOpen:
+                            doorState = doors.DoorState.open
+                    else:
+                        self.atdoor = (
+                            self.params.tg + self.params.tpenal + 
+                            (1 - doorType.value) * (1 - doorState.value) * self.params.tc
+                        )
+                        doorState = doors.DoorState.close
         else:
             self.atdoor -= self.params.timestep
             if self.atdoor == 0:#离开车道流程
@@ -56,7 +71,7 @@ class Person:
             return
         if self.Line.Path[self.idPath-1] == None:
             return
-        if random.random()<self.params.ps:
+        if np.random.random() < self.params.ps:
             return
         ValidNeighbourLine = []
         for i in [-1,1]:

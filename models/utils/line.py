@@ -2,6 +2,7 @@ import sys
 from . import doors, params, person, bike
 import numpy as np
 import time
+import random
 class Line:
     #车道类
     def __init__(self, doorType,idLine = 0):
@@ -20,19 +21,29 @@ class Line:
             doorState = doors.DoorState.open
         for i in self.Allutility:
             i.move(self.doorType, doorState,TotalLine)
-    def generate(self):
-        #满足条件时在最后随机生成人或单车
-        if self.Path[-1]==None:#队尾为空
-            ifgenerate = np.random.random()#是否生成实体的随机数
-            if ifgenerate <= self.params.isGenerate:
-                if self.Path[-2]==None:
-                    ifperson = np.random.random()#是否生成人的随机数
-                    if ifperson <= self.params.isPerson:
-                        person.Person(self)
-                    else:
-                        bike.Bicycle(self)              
-                else:
-                    person.Person(self)
+    def PoissionStream(self,TotalLine:list=None):
+        if TotalLine == None:#单Line情形
+            if self.Path[-1]==None and self.params.unlinedPersonNum>0:#队尾为空且有人预备进队
+                person.Person(self)#队尾生成人
+                self.params.unlinedPersonNum-=1#预备进队人数减一
+            self.params.unlinedPersonNum += np.random.poisson(self.params.crowdType)
+        else:
+            if TotalLine.index(self)==0:#整个车道队全盘模拟一时间步时第一次调用该函数，分配人群
+                AvailableLine = []
+                for line in TotalLine:
+                    if line.Path[-1]==None:
+                        AvailableLine.append(line)#筛选有空格的Line
+                if len(AvailableLine)<=self.params.unlinedPersonNum:#空位少于预备进队人数，所有空位生成一人
+                    for line in AvailableLine:
+                        person.Person(line)
+                    self.params.unlinedPersonNum-=len(AvailableLine)
+                else:#空位多于预备进队人数，随机挑选空位全部分配
+                    ChoosenLine = random.sample(AvailableLine,self.params.unlinedPersonNum)
+                    for line in ChoosenLine:
+                        person.Person(line)
+                    self.params.unlinedPersonNum=0
+            if TotalLine.index(self) == len(TotalLine)-1:#整个车道队全盘模拟一时间步时最后一次一次调用该函数，生成人群
+                self.params.unlinedPersonNum += np.random.poisson(self.params.crowdType)
     def utipass(self):
             #为每个实体的move()调用，打包有实体通过门时对应Line的行为
             self.PassingCounter+=1#计数器+1
@@ -60,12 +71,12 @@ class Line:
         print(str,end = " ")
         time.sleep(0.1*self.params.timestep)#连续输出时每次间隔一个时间步
         sys.stdout.flush()
-    def forward(self,TotalLine = None,print=False,):
+    def forward(self,TotalLine = None,print=False):
         #Line完整的执行一次时间步模拟的封装函数
         self.update(TotalLine)
-        self.generate()
         if print:
             self.print()
+        self.PoissionStream(TotalLine)
     def count_occupied(self):
         """Count the block occupied in a certain time"""
         return sum(x is not None for x in self.Path)

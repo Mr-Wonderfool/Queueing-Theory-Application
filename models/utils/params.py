@@ -9,7 +9,7 @@ class Params:
         self.tp = 0. # combine swap time and pass time into negative exponential
 
         self.laneNum = 1
-        self.successRate = .9
+        self.successRate = .4
         self.laneLength = 40
         self.ps = .5 # prob for switching lane
         self.isPerson = 1.
